@@ -34,14 +34,17 @@ export class MaccabiDataFetcher extends DataFetcher {
             await driver.get(MaccabiLandingPage.url);
             const mainPage = new MaccabiLandingPage(driver);
             await mainPage.noCookies(() => {
+                console.log('about to select the queue kind');
                 return mainPage.selectQueueKind(queueKind);
             });
 
             await mainPage.noCookies(() => {
+                console.log('about to select the dob');
                 return mainPage.selectDateOfBirth();
             });
 
             await mainPage.noCookies(() => {
+                console.log('about to select the city or branch');
                 return mainPage.selectCityOrBranch("נתניה");
             });
 

@@ -28,7 +28,7 @@ schedule.scheduleJob('*/30 * * * * *', function () {
 
     fetchers['maccabi'].fetch()
     .then(({ queues }) => {
-        console.log(queues);
+        queueManager.update('maccabi', queues);
     })
     .catch(err => {
         console.log(err);
@@ -45,19 +45,6 @@ app.get('/providers/:provider', (req, res) => {
     }
 
     res.json(savedProvider);
-});
-
-app.put('/providers/:provider', (req, res) => {
-    const { provider } = req.params;
-    if (!req.body) {
-        return res.json({
-            message: 'no data sent'
-        });
-    }
-
-    queueManager.update(provider, req.body.queues);
-
-    res.json({ message: 'ok' });
 });
 
 app.listen(4000, () => {
