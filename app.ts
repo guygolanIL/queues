@@ -5,6 +5,7 @@ import { QueueManager } from './data/data-manager/QueueManager';
 import schedule from 'node-schedule';
 import { telegram } from './telegram/telegram';
 import { IQueue } from './data/Queue';
+import { fetchers } from './crawlers/provider-data-fetcher/dataFetchers';
 
 const app = express();
 
@@ -20,6 +21,18 @@ schedule.scheduleJob('*/5 * * * * *', function () {
         telegram.sendQueuesByChunks(unsentQueues, (sentQueues: IQueue[]) => queueManager.markAsSent(sentQueues));
     }
 
+});
+
+schedule.scheduleJob('*/30 * * * * *', function () {
+    console.log('starting to fetch maccabi dent data');
+
+    fetchers['maccabi'].fetch()
+    .then(({ queues }) => {
+        console.log(queues);
+    })
+    .catch(err => {
+        console.log(err);
+    });
 });
 
 app.get('/providers/:provider', (req, res) => {

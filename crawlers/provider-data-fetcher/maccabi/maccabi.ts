@@ -1,5 +1,6 @@
 import { Builder, Browser, By, until } from 'selenium-webdriver';
-import { IQueue } from '../../data/Queue';
+import { IProvider } from '../../../data/Provider';
+import { IQueue } from '../../../data/Queue';
 import { DataFetcher } from '../DataFetcher';
 import { MaccabiLandingPage, TableRow } from './pageObjects/MaccabiLandingPage';
 
@@ -77,12 +78,10 @@ export class MaccabiDataFetcher extends DataFetcher {
             }
 
             return {
-                name: 'maccabi',
                 queues,
             };
         } finally {
             await driver.quit();
         }
-
     }
 }
