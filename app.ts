@@ -23,7 +23,7 @@ schedule.scheduleJob('*/5 * * * * *', function () {
 
 });
 
-schedule.scheduleJob('*/30 * * * * *', function () {
+schedule.scheduleJob('* */10 * * * *', function () {
     console.log('starting to fetch maccabi dent data');
 
     fetchers['maccabi'].fetch()
