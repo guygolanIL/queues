@@ -1,6 +1,7 @@
 import { ILocation } from "./Location";
 import { ITherapist } from "./Therapist";
 import {createHash} from 'crypto';
+import mongoose from "mongoose";
 
 export interface IQueue {
     service: string;
@@ -8,6 +9,26 @@ export interface IQueue {
     location: ILocation;
     date: string;
 }
+
+const queueSchema = new mongoose.Schema<IQueue>({
+    service: { type: String, required: true },
+    therapist: { 
+        type: new mongoose.Schema<ITherapist>({
+            firstName: String,
+            lastName: String,
+        }) 
+    },
+    location: { 
+        type: new mongoose.Schema<ILocation>({
+            branch: String,
+            city: String,
+        }), 
+        required: true 
+    },
+    date: { type: String, required: true },
+});
+
+export const QueueModel = mongoose.model('Queue', queueSchema);
 
 function dateToMessage(date: string) {
     const dateObj = new Date(date);
