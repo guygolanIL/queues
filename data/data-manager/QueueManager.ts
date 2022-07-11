@@ -41,15 +41,14 @@ export class QueueManager {
                 'therapist.name': { $regex: therapist },
             });
 
-            console.log(`queues that matched user ${user.chatId} query: (${toString(user)}): `, queues);
-
             // find new unsent queues
             const unsentQueues = queues
-                .filter(({ _id }) => !user.sentQueues.includes(_id.toString()))
-                .splice(0, MAX_MSG);
+            .filter(({ _id }) => !user.sentQueues.includes(_id.toString()))
+            .splice(0, MAX_MSG);
+            
+            console.log(`found ${queues.length} queues that matched user ${user.chatId} (${unsentQueues.length} of them are new). query: (${toString(user)})`);
 
             if (unsentQueues.length > 0) {
-                console.log(`found ${unsentQueues.length} new queues for user ${user.chatId}`);
                 //notify user
                 await bot.sendMessage(user.chatId, `Found ${unsentQueues.length} new queues for you :)`);
                 const msgPromises = [];
