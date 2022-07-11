@@ -10,6 +10,7 @@ export interface IUser {
     chatId: number;
     onboardStep: 'service' | 'location' | 'therapist' | 'done';
     query: IQuery;
+    sentQueues: string[];
 }
 
 const userSchema = new Schema<IUser>({
@@ -19,10 +20,11 @@ const userSchema = new Schema<IUser>({
         type: new Schema<IQuery>({
             service: { type: String, required: false },
             therapist: { type: String, required: false },
-            location: { type: String, required: false }
+            location: { type: String, required: false },
         }),
-        required: true
-    }
+        required: true,
+    },
+    sentQueues: [{ type: Schema.Types.ObjectId, required: true, ref: 'Queue'}],
 });
 
 export const UserModel = model('User', userSchema);

@@ -1,79 +1,70 @@
-import { IProvider, IQueueInfo } from "../Provider";
-import { compare, IQueue } from "../Queue";
+import { bot } from "../../telegram/telegram";
+import { getQueueHash, IQueue, QueueModel, toMessage } from "../Queue";
+import { toString, UserModel } from "../User";
 
 export class QueueManager {
 
-    providers: Array<IProvider> = [];
-
-    public findProviderByName(providerName: string): IProvider | undefined {
-        const providerWithStatus = this.providers.find((provider) => provider.name === providerName);
-        return providerWithStatus;
-    }
-
-    public markAsSent(unsentQueues: IQueue[]) {
-        this.providers.forEach(provider => {
-            provider.queuesInfo.forEach(({ queue, telegramStatus }) => {
-                const found = unsentQueues.find(unsentQueue => compare(unsentQueue, queue));
-                if (found) {
-                    telegramStatus.sent = true
-                }
-            });
+    public async update(queues: IQueue[]) {
+        const hashToQueueMap: { [key: string]: IQueue } = {};
+        queues.forEach(queue => {
+            hashToQueueMap[getQueueHash(queue)] = queue;
         });
+
+        const oldQueues = await QueueModel.find({ hash: { $in: Object.keys(hashToQueueMap) } });
+
+        const newQueues = Object.entries(hashToQueueMap).filter(([hash, queue]) => {
+            const foundQueue = oldQueues.find(q => q.hash === hash);
+            return !foundQueue;
+        })
+            .map(([, queue]) => queue);
+
+        await QueueModel.insertMany(newQueues);
     }
 
-    public findUnsentQueues(filters?: { provider?: string; therapistName?: string; service?: string }): IQueue[] {
-        const providerFilter = filters?.provider;
-        const therapistFilter = filters?.therapistName;
-        const serviceFilter = filters?.service;
+    /**
+     * 1. for each user find all the queues that match its query
+     * 2. for those queues find those that havent been alerted about
+     * 3. notify user of new queues 
+     */
+    public async calculateNotifications() {
+        const MAX_MSG = 30;
+        const users = await UserModel.find({ onboardStep: 'done' });
+        console.log(`processing ${users.length} users requests`);
+        for (const user of users) {
+            console.log(`calculating for user ${user.chatId}`);
 
-        const providers =
-            this.providers
-                .filter(provider => {
-                    return providerFilter ? provider.name === providerFilter : true
-                });
+            const { location, service, therapist } = user.query;
 
-        const queuesWithStatus: IQueueInfo[] = providers.reduce((prev, curr) => {
-            return [...prev, ...curr.queuesInfo];
-        }, [] as IQueueInfo[]);
-
-        const unsentQueues =
-            queuesWithStatus
-                .filter(({ telegramStatus }) => {
-                    return !telegramStatus.sent
-                })
-                .filter(({ queue }) => {
-                    return therapistFilter ? `${queue.therapist?.firstName} ${queue.therapist?.lastName}` === therapistFilter : true
-                })
-                .filter(({ queue }) => {
-                    return serviceFilter ? queue.service === serviceFilter : true
-                })
-                .map(({ queue }) => queue);
-
-        return unsentQueues;
-    }
-
-    public update(providerName: string, queues?: Array<IQueue>) {
-        const provider = this.findProviderByName(providerName);
-        if (!provider) {
-            const newQueuesInfo: IQueueInfo[] | undefined = queues?.map(queue => ({ queue, telegramStatus: { sent: false } }));
-            const newProvider: IProvider = {
-                name: providerName,
-                queuesInfo: newQueuesInfo || []
-            };
-
-            this.providers.push(newProvider);
-
-        } else {
-            if (!queues) return;
-            queues.forEach(queue => {
-                const foundQueueInfo = provider.queuesInfo.find(queueInfo => compare(queueInfo.queue, queue));
-                if (!foundQueueInfo) {
-                    provider.queuesInfo.push({ queue, telegramStatus: { sent: false } });
-                } else {
-                    console.log('queue already tracked', queue);
-                }
+            // find user's query matching queues 
+            const queues = await QueueModel.find({ 
+                service,
+                "$or": [
+                    {'therapist.firstName': { $regex: therapist }},
+                    {'therapist.lastName': { $regex: therapist }}
+                ]
             });
-        }
 
+            console.log(`queues that matched user ${user.chatId} query: (${toString(user)}): `, queues);
+
+            // find new unsent queues
+            const unsentQueues = queues.filter(({ _id }) => {
+                return !user.sentQueues.includes(_id.toString());
+            }).splice(0, MAX_MSG);
+
+            if (unsentQueues.length > 0) {
+                console.log(`found ${unsentQueues.length} new queues for user ${user.chatId}`);
+                //notify user
+                await bot.sendMessage(user.chatId, `Found ${unsentQueues.length} new queues for you :)`);
+                const msgPromises = [];
+                for (const unsentQ of unsentQueues) {
+                    msgPromises.push(bot.sendMessage(user.chatId, toMessage(unsentQ)));
+                }
+                await Promise.all(msgPromises);
+                const sentQueuesIds = unsentQueues.map(q => q._id.toString());
+                user.sentQueues.push(...sentQueuesIds);
+                await user.save();
+            }
+
+        }
     }
 }

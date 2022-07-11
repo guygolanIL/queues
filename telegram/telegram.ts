@@ -2,9 +2,13 @@ import TelegramBot from 'node-telegram-bot-api';
 import { IUser, UserModel } from '../data/User';
 import { toString } from '../data/User';
 
+export let bot: TelegramBot;
 
-export function initBot(bot: TelegramBot) {
-
+export function initBot() {
+    bot = new TelegramBot(process.env.BOT_TOKEN || '', {
+        polling: true
+    });
+    
     async function handleCommands(msg: TelegramBot.Message): Promise<boolean> {
         const chatId = msg.chat.id;
 
@@ -16,7 +20,8 @@ export function initBot(bot: TelegramBot) {
                 const userParams: IUser = {
                     chatId,
                     onboardStep: 'service',
-                    query: {}
+                    query: {},
+                    sentQueues: [],
                 }
 
                 const user = new UserModel(userParams);

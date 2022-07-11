@@ -1,4 +1,4 @@
-import { By, until, WebDriver } from "selenium-webdriver";
+import { By, Key, until, WebDriver } from "selenium-webdriver";
 
 export type TableRow = {
     clinic_name?: string;
@@ -33,7 +33,7 @@ export class MaccabiLandingPage {
     }
 
     async selectDateOfBirth() {
-        const dob = '20071991';
+        const dob = '20/07/1991' + Key.TAB;
         const birthdateInput = await this.driver.wait(() => {
             return this.driver.findElement(By.css('.bdate-select input'));
         });
