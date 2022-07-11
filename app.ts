@@ -16,13 +16,13 @@ app.use(cors());
 
 const queueManager = new QueueManager();
 
-// scheduleJob('*/60 * * * * *', async () => {
-//     console.log('fetching queues job started');
-//     const { queues } = await fetchers['maccabi'].fetch();
-//     console.log(`found ${queues.length} queues`, queues);
-//     await queueManager.update(queues);
-//     console.log('fetching queues job ended');
-// });
+scheduleJob('*/60 * * * * *', async () => {
+    console.log('fetching queues job started');
+    const { queues } = await fetchers['maccabi'].fetch();
+    console.log(`found ${queues.length} queues`, queues);
+    await queueManager.update(queues);
+    console.log('fetching queues job ended');
+});
 
 scheduleJob('*/60 * * * * *', async () => {
     console.log('calculate notifications job started');
