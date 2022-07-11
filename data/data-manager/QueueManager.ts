@@ -38,18 +38,15 @@ export class QueueManager {
             // find user's query matching queues 
             const queues = await QueueModel.find({ 
                 service,
-                "$or": [
-                    {'therapist.firstName': { $regex: therapist }},
-                    {'therapist.lastName': { $regex: therapist }}
-                ]
+                'therapist.name': { $regex: therapist },
             });
 
             console.log(`queues that matched user ${user.chatId} query: (${toString(user)}): `, queues);
 
             // find new unsent queues
-            const unsentQueues = queues.filter(({ _id }) => {
-                return !user.sentQueues.includes(_id.toString());
-            }).splice(0, MAX_MSG);
+            const unsentQueues = queues
+                .filter(({ _id }) => !user.sentQueues.includes(_id.toString()))
+                .splice(0, MAX_MSG);
 
             if (unsentQueues.length > 0) {
                 console.log(`found ${unsentQueues.length} new queues for user ${user.chatId}`);

@@ -7,8 +7,7 @@ export interface ILocation {
 }
 
 export interface ITherapist {
-    firstName?: string;
-    lastName?: string;
+    name: string;
 }
 
 export interface IQueue {
@@ -23,8 +22,7 @@ const queueSchema = new mongoose.Schema<IQueue>({
     service: { type: String, required: true },
     therapist: { 
         type: new mongoose.Schema<ITherapist>({
-            firstName: String,
-            lastName: String,
+            name: String
         }) 
     },
     location: { 
@@ -46,13 +44,13 @@ function dateToMessage(date: string) {
 }
 
 export function toMessage({ location, service, date, therapist }: IQueue) {
-    const message = `service: ${service},\nlocation: ${location.branch},\ndate: ${dateToMessage(date)},\ntherapist: ${therapist?.firstName} ${therapist?.lastName}`;
+    const message = `service: ${service},\nlocation: ${location.branch},\ndate: ${dateToMessage(date)},\ntherapist: ${therapist?.name}`;
     return message;
 }
 
 export function getQueueHash(queue: Omit<IQueue, 'hash'>) {
     const plainText = 
-        `${queue.service};${queue.therapist?.firstName};${queue.therapist?.lastName};${queue.location.branch};${queue.location.city};${queue.date}`;
+        `${queue.service};${queue.therapist?.name};${queue.location.branch};${queue.location.city};${queue.date}`;
 
     return createHash('sha256').update(plainText).digest('hex');
 }

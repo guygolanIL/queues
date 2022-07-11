@@ -31,7 +31,7 @@ export function initBot() {
                     bot.sendMessage(chatId, `Welcome ${msg.from?.first_name}, please choose the desired service`, {
                         reply_markup: {
                             keyboard: [
-                                [{ text: 'תור לשיננית' }],
+                                [{ text: 'שיננית' }],
                             ],
                         },
                     });
@@ -88,9 +88,9 @@ export function initBot() {
                 break;
 
             case 'service':
-                if (msg.text === 'תור לשיננית') {
+                if (msg.text === 'שיננית') {
 
-                    userSelectionModel.query.service = "תור לשיננית";
+                    userSelectionModel.query.service = "שיננית";
                     userSelectionModel.onboardStep = 'location';
 
                     bot.sendMessage(chatId, `Gotcha, please select the location`, {
