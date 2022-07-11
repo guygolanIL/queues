@@ -123,7 +123,7 @@ export function initBot() {
                     const { queues } = await fetchers['maccabi'].fetch(userSelectionModel.query.service, userSelectionModel.query.location);
                     
                     const therapists = [...new Set(queues.map(q => q.therapist!.name))];
-                    bot.sendMessage(chatId, 'Finally, please select the therapist.', {
+                    bot.sendMessage(chatId, 'Finally, please select the therapist. (or type another name)', {
                         reply_markup: {
                             one_time_keyboard: true,
                             keyboard: getKeyboardButtons(therapists)
