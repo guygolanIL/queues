@@ -1,8 +1,18 @@
 import TelegramBot from 'node-telegram-bot-api';
+import { fetchers } from '../data-fetchers/dataFetchers';
 import { IUser, UserModel } from '../data/User';
 import { toString } from '../data/User';
 
 export let bot: TelegramBot;
+
+const branches = ["נתניה"];
+const services = ["שיננית", "רופא"];
+
+function getKeyboardButtons(texts: string[]) {
+    return texts.map(text => ([{ text}]));
+}
+
+
 
 export function initBot() {
     bot = new TelegramBot(process.env.BOT_TOKEN || '', {
@@ -28,11 +38,9 @@ export function initBot() {
 
                 try {
                     await user.save();
-                    bot.sendMessage(chatId, `Welcome ${msg.from?.first_name}, please choose the desired service`, {
+                    bot.sendMessage(chatId, `Welcome ${msg.from?.first_name}, please choose the desired service.`, {
                         reply_markup: {
-                            keyboard: [
-                                [{ text: 'שיננית' }],
-                            ],
+                            keyboard: getKeyboardButtons(services),
                         },
                     });
                 } catch (error) {
@@ -44,9 +52,9 @@ export function initBot() {
                 const user = await UserModel.findOne({ chatId });
 
                 if (user) {
-                    bot.sendMessage(chatId, `Ok, this is all we know about your query\n${toString(user)}`);
+                    bot.sendMessage(chatId, `Ok, this is all we know about your query:\n${toString(user)}`);
                 } else {
-                    bot.sendMessage(chatId, `You dont have a query just yet. Use /start`);
+                    bot.sendMessage(chatId, `You dont have a query just yet. Use /start.`);
                 }
             }
         };
@@ -84,43 +92,46 @@ export function initBot() {
 
         switch (userSelectionModel.onboardStep) {
             case 'done':
-                bot.sendMessage(chatId, 'Im already familiar with you :). if you want to alter your query please type /start');
+                bot.sendMessage(chatId, 'Im already familiar with you :). if you want to alter your query please type /start.');
                 break;
 
             case 'service':
-                if (msg.text === 'שיננית') {
+                if (msg.text && services.includes(msg.text)) {
 
-                    userSelectionModel.query.service = "שיננית";
+                    userSelectionModel.query.service = msg.text;
                     userSelectionModel.onboardStep = 'location';
 
-                    bot.sendMessage(chatId, `Gotcha, please select the location`, {
+                    bot.sendMessage(chatId, `Gotcha, please select the location.`, {
                         reply_markup: {
-                            keyboard: [
-                                [{ text: 'נתניה' }]
-                            ]
+                            keyboard: getKeyboardButtons(branches)
                         }
                     });
                 } else {
-                    createHandleUnknownCommand(chatId, [
-                        [{ text: 'תור לשיננית' }],
-                    ])(bot)
+                    createHandleUnknownCommand(chatId, getKeyboardButtons(services))(bot);
                 }
                 break;
 
             case 'location':
-                if (msg.text === 'נתניה') {
-                    userSelectionModel.query.location = 'נתניה';
+                if (msg.text && branches.includes(msg.text)) {
+                    userSelectionModel.query.location = msg.text;
                     userSelectionModel.onboardStep = 'therapist';
 
-                    bot.sendMessage(chatId, 'Finally, please select the therapist', {
+                    bot.sendMessage(chatId, "One sec, i'm thinking...", {
                         reply_markup: {
-                            remove_keyboard: true
+                            remove_keyboard: true,
+                        },
+                    });
+
+                    const { queues } = await fetchers['maccabi'].fetch(userSelectionModel.query.service, userSelectionModel.query.location);
+                    const therapists = [...new Set(queues.map(q => q.therapist!.name))];
+                    bot.sendMessage(chatId, 'Finally, please select the therapist.', {
+                        reply_markup: {
+                            one_time_keyboard: true,
+                            keyboard: getKeyboardButtons(therapists)
                         }
                     });
                 } else {
-                    createHandleUnknownCommand(chatId, [
-                        [{ text: 'נתניה' }]
-                    ])(bot)
+                    createHandleUnknownCommand(chatId, getKeyboardButtons(branches))(bot);
                 }
                 break;
 
@@ -134,7 +145,7 @@ export function initBot() {
                 console.error('invalid state', userSelectionModel);
                 userSelectionModel.onboardStep = 'service';
                 userSelectionModel.query = {};
-                bot.sendMessage(chatId, 'An error occurred please use the /start to start fresh');
+                bot.sendMessage(chatId, 'An error occurred please use the /start to start fresh.');
         }
 
 

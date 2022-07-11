@@ -1,5 +1,5 @@
 import { IQueue } from "../data/Queue";
 
 export abstract class DataFetcher {
-    abstract fetch(): Promise<{ queues: Array<IQueue>}>;
+    abstract fetch(service?: string, place?: string): Promise<{ queues: Array<IQueue>}>;
 }

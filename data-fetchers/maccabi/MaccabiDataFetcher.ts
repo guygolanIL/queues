@@ -1,4 +1,4 @@
-import { getQueueHash, IQueue } from '../../data/Queue';
+import { getQueueHash, IQueue, parseName } from '../../data/Queue';
 import { DataFetcher } from '../DataFetcher';
 import axios from 'axios';
 import qs from 'qs';
@@ -87,11 +87,10 @@ export class MaccabiDataFetcher extends DataFetcher {
                         const [hr, min] = time.split(':');
                         const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hr), parseInt(min));
 
-
                         lines.forEach(({doctor_name}) => {
                             const queueData: Omit<IQueue, 'hash'> = {
                                 therapist: {
-                                    name: doctor_name
+                                    name: parseName(doctor_name)
                                 },
                                 date: dateObj.toUTCString(),
                                 service,
