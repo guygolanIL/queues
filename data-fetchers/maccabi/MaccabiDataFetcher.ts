@@ -1,4 +1,4 @@
-import { getQueueHash, IQueue, parseName } from '../../data/Queue';
+import { getQueueHash, IQueue } from '../../data/Queue';
 import { DataFetcher } from '../DataFetcher';
 import axios from 'axios';
 import qs from 'qs';
@@ -28,12 +28,17 @@ interface ICalendar {
 }
 
 const serviceTranslation: {[key: string]: string} = {
-    'שיננית': 'hygenist'
+    'שיננית': 'hygenist',
+    'רופא': 'dentist'
 };
 
 const placeTranslation: {[key: string]: string} = {
     'נתניה': '31'
 };
+
+function parseName(name: string): string {
+    return name.replace(/[^א-ת ]/gi, '').split(' ').reverse().join(' ');
+}
 
 export class MaccabiDataFetcher extends DataFetcher {
 

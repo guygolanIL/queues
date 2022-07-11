@@ -6,13 +6,11 @@ import { toString } from '../data/User';
 export let bot: TelegramBot;
 
 const branches = ["נתניה"];
-const services = ["שיננית", "רופא"];
+const services = ["שיננית"];
 
 function getKeyboardButtons(texts: string[]) {
     return texts.map(text => ([{ text}]));
 }
-
-
 
 export function initBot() {
     bot = new TelegramBot(process.env.BOT_TOKEN || '', {
@@ -123,6 +121,7 @@ export function initBot() {
                     });
 
                     const { queues } = await fetchers['maccabi'].fetch(userSelectionModel.query.service, userSelectionModel.query.location);
+                    
                     const therapists = [...new Set(queues.map(q => q.therapist!.name))];
                     bot.sendMessage(chatId, 'Finally, please select the therapist.', {
                         reply_markup: {

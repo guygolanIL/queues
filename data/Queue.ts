@@ -10,10 +10,6 @@ export interface ITherapist {
     name: string;
 }
 
-export function parseName(name: string): string {
-    return name.replace(/[^א-ת ]/gi, '').split(' ').reverse().join(' ');
-}
-
 export interface IQueue {
     service: string;
     therapist?: ITherapist;
