@@ -44,3 +44,6 @@ app.listen(4000, () => {
         })
         .catch(err => console.log('failed to connect to db with err', err));
 });
+
+
+module.exports = app;
