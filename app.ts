@@ -31,6 +31,10 @@ scheduleJob('*/60 * * * * *', async () => {
 });
 
 
+app.get('/', (req, res) => {
+    return res.send({ hello: 'world'});
+});
+
 app.listen(4000, () => {
     connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.gspqo.mongodb.net/?retryWrites=true&w=majority`)
         .then(() => {
