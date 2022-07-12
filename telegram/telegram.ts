@@ -1,12 +1,12 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { fetchers } from '../data-fetchers/dataFetchers';
+import { fetchAllQueues } from '../data-fetchers/dataFetchers';
 import { IUser, UserModel } from '../data/User';
 import { toString } from '../data/User';
 
 export let bot: TelegramBot;
 
-const branches = ["נתניה"];
-const services = ["שיננית"];
+export const branches = ["נתניה"];
+export const services = ["שיננית", "רופא"];
 
 function getKeyboardButtons(texts: string[]) {
     return texts.map(text => ([{ text}]));
@@ -120,7 +120,7 @@ export function initBot() {
                         },
                     });
 
-                    const { queues } = await fetchers['maccabi'].fetch(userSelectionModel.query.service, userSelectionModel.query.location);
+                    const {queues} = await fetchAllQueues({ service: userSelectionModel.query.service });
                     
                     const therapists = [...new Set(queues.map(q => q.therapist!.name))];
                     bot.sendMessage(chatId, 'Finally, please select the therapist. (or type another name)', {
