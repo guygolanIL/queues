@@ -35,10 +35,12 @@ app.get('/', (req, res) => {
     return res.send({ hello: 'world'});
 });
 
-app.listen(4000, () => {
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {
     connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.gspqo.mongodb.net/?retryWrites=true&w=majority`)
         .then(() => {
-            console.log('server started on 4000');
+            console.log(`server started on ${PORT}`);
             
             initBot();
         })
