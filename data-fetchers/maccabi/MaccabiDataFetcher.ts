@@ -86,32 +86,34 @@ export class MaccabiDataFetcher extends DataFetcher {
                 const queues: IQueue[] = [];
                 const doctors = data.doctors as IDoctors;
                 const lines = data.lines as ICalendar;
-                Object.values(lines).forEach(day => {
-                    Object.values(day).forEach(frame => {
-                        const { day, time, lines, month, year } = frame;
-                        const [hr, min] = time.split(':');
-                        const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hr), parseInt(min));
-
-                        lines.forEach(({doctor_name}) => {
-                            const queueData: Omit<IQueue, 'hash'> = {
-                                therapist: {
-                                    name: parseName(doctor_name)
-                                },
-                                date: dateObj.toUTCString(),
-                                service,
-                                location: {
-                                    branch: place,
-                                    city: place,
-                                },
-                            }; 
-
-                            queues.push({
-                                ...queueData,
-                                hash: getQueueHash(queueData),
+                if(lines) {
+                    Object.values(lines).forEach(day => {
+                        Object.values(day).forEach(frame => {
+                            const { day, time, lines, month, year } = frame;
+                            const [hr, min] = time.split(':');
+                            const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hr), parseInt(min));
+    
+                            lines.forEach(({doctor_name}) => {
+                                const queueData: Omit<IQueue, 'hash'> = {
+                                    therapist: {
+                                        name: parseName(doctor_name)
+                                    },
+                                    date: dateObj.toUTCString(),
+                                    service,
+                                    location: {
+                                        branch: place,
+                                        city: place,
+                                    },
+                                }; 
+    
+                                queues.push({
+                                    ...queueData,
+                                    hash: getQueueHash(queueData),
+                                });
                             });
                         });
                     });
-                });
+                }
 
                 return { queues };
             })
