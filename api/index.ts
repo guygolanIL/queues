@@ -1,12 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import { json } from 'express';
-import { initBot } from './telegram/telegram';
+import { initBot } from '../telegram/telegram';
 import { connect } from 'mongoose';
 import * as dotenv from 'dotenv';
 import { scheduleJob } from 'node-schedule';
-import { QueueManager } from './data/data-manager/QueueManager';
-import { fetchers } from './data-fetchers/dataFetchers';
+import { QueueManager } from '../data/data-manager/QueueManager';
+import { fetchers } from '../data-fetchers/dataFetchers';
 
 dotenv.config();
 
