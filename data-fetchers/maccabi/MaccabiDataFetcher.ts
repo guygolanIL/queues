@@ -83,7 +83,6 @@ export class MaccabiDataFetcher extends DataFetcher {
 
         return axios(config)
             .then(function (res) {
-                console.log(res);
                 const { data } = res;
 
                 const queues: IQueue[] = [];
