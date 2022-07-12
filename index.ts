@@ -5,8 +5,8 @@ import { initBot } from './telegram/telegram';
 import { connect } from 'mongoose';
 import * as dotenv from 'dotenv';
 import { scheduleJob } from 'node-schedule';
-import { QueueManager } from './data/data-manager/QueueManager';
-import { fetchers } from './data-fetchers/dataFetchers';
+import { queueManager } from './data/data-manager/QueueManager';
+import { fetchAllQueues } from './data-fetchers/dataFetchers';
 
 dotenv.config();
 
@@ -14,11 +14,11 @@ const app = express();
 app.use(json());
 app.use(cors());
 
-const queueManager = new QueueManager();
-
 scheduleJob('*/60 * * * * *', async () => {
     console.log('fetching queues job started');
-    const { queues } = await fetchers['maccabi'].fetch();
+    
+    const {queues} = await fetchAllQueues();
+
     console.log(`found ${queues.length} queues`, queues);
     await queueManager.update(queues);
     console.log('fetching queues job ended');

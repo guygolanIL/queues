@@ -2,7 +2,7 @@ import { bot } from "../../telegram/telegram";
 import { getQueueHash, IQueue, QueueModel, toMessage } from "../Queue";
 import { toString, UserModel } from "../User";
 
-export class QueueManager {
+class QueueManager {
 
     public async update(queues: IQueue[]) {
         const hashToQueueMap: { [key: string]: IQueue } = {};
@@ -64,3 +64,5 @@ export class QueueManager {
         }
     }
 }
+
+export const queueManager = new QueueManager();

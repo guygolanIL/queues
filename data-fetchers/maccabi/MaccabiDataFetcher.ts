@@ -42,7 +42,7 @@ function parseName(name: string): string {
 
 export class MaccabiDataFetcher extends DataFetcher {
 
-    async fetch(service: string = 'שיננית', place: string = 'נתניה'): Promise<{ queues: IQueue[]; }> {
+    async fetch(service: string, place: string): Promise<{ queues: IQueue[]; }> {
 
         const data = qs.stringify({
             'action': 'get_lines',
@@ -63,7 +63,6 @@ export class MaccabiDataFetcher extends DataFetcher {
                 'Accept': 'application/json, text/javascript, */*; q=0.01', 
                 'Accept-Language': 'en-US,en;q=0.9,he;q=0.8', 
                 'Cache-Control': 'no-cache', 
-                'Content-Length': '177', 
                 'Host': 'maccabi-dent.com', 
                 'Origin': 'https://maccabi-dent.com', 
                 'Pragma': 'no-cache', 
