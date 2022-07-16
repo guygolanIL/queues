@@ -24,9 +24,10 @@ export function initBot() {
             '/start': async () => {
 
                 await UserModel.deleteMany({ chatId });
-
+                const tgUser = msg.from;
                 const userParams: IUser = {
                     chatId,
+                    tgUser,
                     onboardStep: 'service',
                     query: {},
                     sentQueues: [],

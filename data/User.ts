@@ -1,4 +1,5 @@
 import { Schema, model } from 'mongoose';
+import { User as TelegramUser } from 'node-telegram-bot-api';
 
 export interface IQuery {
     service?: string;
@@ -6,8 +7,11 @@ export interface IQuery {
     location?: string;
 }
 
+type TelegramUserData = Pick<TelegramUser, 'first_name' | 'last_name' | 'username'>;
+
 export interface IUser {
     chatId: number;
+    tgUser?: TelegramUserData; 
     onboardStep: 'service' | 'location' | 'therapist' | 'done';
     query: IQuery;
     sentQueues: string[];
@@ -16,6 +20,11 @@ export interface IUser {
 const userSchema = new Schema<IUser>({
     onboardStep: { type: String, required: true },
     chatId: { type: Number, required: true },
+    tgUser: { type: new Schema<TelegramUserData>({
+        first_name: String,
+        last_name: String,
+        username: String,
+    })},
     query: {
         type: new Schema<IQuery>({
             service: { type: String, required: false },
