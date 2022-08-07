@@ -5,24 +5,23 @@ import { toString } from '../data/User';
 
 export let bot: TelegramBot;
 
-export const branches = ["נתניה"];
+export const branches = ["תל אביב - רמת אביב", "נתניה"];
 export const services = ["שיננית", "רופא"];
 
 function getKeyboardButtons(texts: string[]) {
-    return texts.map(text => ([{ text}]));
+    return texts.map(text => ([{ text }]));
 }
 
 export function initBot() {
     bot = new TelegramBot(process.env.BOT_TOKEN || '', {
         polling: true
     });
-    
+
     async function handleCommands(msg: TelegramBot.Message): Promise<boolean> {
         const chatId = msg.chat.id;
 
         const commands: { [key: string]: Function } = {
             '/start': async () => {
-
                 await UserModel.deleteMany({ chatId });
                 const tgUser = msg.from;
                 const userParams: IUser = {
@@ -77,9 +76,9 @@ export function initBot() {
 
     bot.on('message', async (msg) => {
         const chatId = msg.chat.id;
-        const shouldExit = await handleCommands(msg);
+        const commandHandled = await handleCommands(msg);
 
-        if (shouldExit) {
+        if (commandHandled) {
             return;
         }
 
@@ -89,6 +88,14 @@ export function initBot() {
             return;
         }
 
+        const createHandleUnknownCommand = (chatId: number, keyboard: TelegramBot.KeyboardButton[][]) => (bot: TelegramBot) => {
+            bot.sendMessage(chatId, 'Unknwon command. please try again', {
+                reply_markup: {
+                    keyboard,
+                },
+            });
+        };
+        
         switch (userSelectionModel.onboardStep) {
             case 'done':
                 bot.sendMessage(chatId, 'Im already familiar with you :). if you want to alter your query please type /start.');
@@ -121,8 +128,11 @@ export function initBot() {
                         },
                     });
 
-                    const {queues} = await fetchAllQueues({ service: userSelectionModel.query.service });
-                    
+                    const { queues } = await fetchAllQueues({
+                        service: userSelectionModel.query.service || services[0],
+                        branch: userSelectionModel.query.location
+                    });
+
                     const therapists = [...new Set(queues.map(q => q.therapist!.name))];
                     bot.sendMessage(chatId, 'Finally, please select the therapist. (or type another name)', {
                         reply_markup: {
@@ -152,11 +162,3 @@ export function initBot() {
         await userSelectionModel.save();
     });
 }
-
-const createHandleUnknownCommand = (chatId: number, keyboard: TelegramBot.KeyboardButton[][]) => (bot: TelegramBot) => {
-    bot.sendMessage(chatId, 'Unknwon command. please try again', {
-        reply_markup: {
-            keyboard,
-        },
-    });
-};

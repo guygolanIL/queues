@@ -33,7 +33,8 @@ const serviceTranslation: {[key: string]: string} = {
 };
 
 const placeTranslation: {[key: string]: string} = {
-    'נתניה': '31'
+    'נתניה': '31',
+    'תל אביב - רמת אביב': '35',
 };
 
 function parseName(name: string): string {
